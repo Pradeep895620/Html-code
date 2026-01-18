@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile QR Studio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root { --accent: #007aff; --bg: #f2f2f7; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica; 
+            background: var(--bg); margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .card { 
+            background: white; padding: 25px; border-radius: 20px; 
+            width: 100%; max-width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center; box-sizing: border-box;
+        }
+        input, select {
+            width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px;
+            border: 1px solid #ddd; background: #fafafa; font-size: 16px; box-sizing: border-box;
+        }
+        .qr-display {
+            margin: 25px auto; padding: 15px; background: white;
+            display: inline-block; border-radius: 15px; border: 1px solid #eee;
+        }
+        /* Style the image to be easily tappable */
+        #qrcode img {
+            display: block; margin: 0 auto; -webkit-touch-callout: default;
+        }
+        button {
+            width: 100%; padding: 16px; border: none; border-radius: 14px;
+            background: var(--accent); color: white; font-size: 17px; font-weight: 600;
+        }
+        .instruction { font-size: 13px; color: #8e8e93; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2 style="margin-top:0">QR to Phone</h2>
+    
+    <select id="type" onchange="updateFields()">
+        <option value="url">🌐 Website Link</option>
+        <option value="wifi">📶 Wi-Fi Access</option>
+        <option value="tel">📞 Phone Number</option>
+    </select>
+
+    <div id="input-area">
+        <input type="text" id="main-input" placeholder="Enter link here...">
+    </div>
+
+    <div id="wifi-area" style="display:none">
+        <input type="text" id="ssid" placeholder="WiFi Name">
+        <input type="text" id="pass" placeholder="Password">
+    </div>
+
+    <div id="qrcode" class="qr-display"></div>
+
+    <button onclick="generate()">Generate QR Code</button>
+    
+    <p class="instruction"><strong>Tip:</strong> Press and hold the QR code to save it to your Photos/Gallery.</p>
+</div>
+
+<script>
+    // Set up the QR generator
+    const qrcode = new QRCode(document.getElementById("qrcode"), {
+        width: 220, height: 220,
+        colorDark: "#000000", colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    function updateFields() {
+        const type = document.getElementById('type').value;
+        document.getElementById('input-area').style.display = (type === 'wifi') ? 'none' : 'block';
+        document.getElementById('wifi-area').style.display = (type === 'wifi') ? 'block' : 'none';
+    }
+
+    function generate() {
+        const type = document.getElementById('type').value;
+        let data = "";
+
+        if (type === 'wifi') {
+            const s = document.getElementById('ssid').value;
+            const p = document.getElementById('pass').value;
+            data = `WIFI:S:${s};T:WPA;P:${p};;`;
+        } else {
+            const val = document.getElementById('main-input').value;
+            data = (type === 'tel') ? `tel:${val}` : val;
+        }
+
+        if(!data) return alert("Please fill in info");
+
+        qrcode.clear();
+        qrcode.makeCode(data);
+    }
+
+    // Default load
+    qrcode.makeCode("https://google.com");
+</script>
+
+</body>
+</html>
